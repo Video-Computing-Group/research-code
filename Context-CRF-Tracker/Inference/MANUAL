@@ -1,0 +1,20 @@
+
+The package includes 3 Matlab-interfaces to the c-code:
+
+1. inference.m
+   An interface to the full inference package, includes several methods for
+   approximate inference: Loopy Belief Propagation, Generalized Belief
+   Propagation, Mean-Field approximation, and 4 monte-carlo sampling methods
+   (Metropolis, Gibbs, Wolff, Swendsen-Wang).
+   Use "help inference" from Matlab to see all options for usage.
+
+2. gbp_preprocess.m and gbp.m
+   These 2 interfaces split Generalized Belief Propagation into the pre-process
+   stage (gbp_preprocess.m) and the inference stage (gbp.m), so the user may use
+   only one of them, or changing some parameters in between.
+   Use "help gbp_preprocess" and "help gbp" from Matlab.
+
+3. simulatedAnnealing.m
+   An interface to the simulated-annealing c-code. This code uses Metropolis
+   sampling method, the same one used for inference.
+   Use "help simulatedAnnealing" from Matlab.
