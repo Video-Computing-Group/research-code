@@ -1,0 +1,1140 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>Matlab Toolbox for Submodular Function Optimization (v 2.0)</title><meta name="generator" content="MATLAB 7.9"><meta name="date" content="2010-03-05"><meta name="m-file" content="sfo_tutorial_pub"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h1>Matlab Toolbox for Submodular Function Optimization (v 2.0)</h1><!--introduction--><p>Tutorial script and all implementations Andreas Krause (<a href="mailto:krausea@gmail.com">krausea@gmail.com</a>). Slides, videos and detailed references available at <a href="http://www.submodularity.org">http://www.submodularity.org</a>.</p><p>Tested in MATLAB 7.0.1 (R14), 7.2.0 (R2006a), 7.4.0 (R2007a, MAC).</p><p><b>Welcome to this introduction!</b></p><p>We will discuss how we can use the toolbox to optimize submodular set functions, i.e., functions that take a subset A of a finite ground set V to the real numbers, satisfying</p><p><img src="sfo_tutorial_pub_eq07218.png" alt="$$F(A)+F(B)\geq F(A\cup B)+F(A\cap B)$$"></p><p><b>A note on Octave compatibility:</b></p><p>This toolbox also works under Octave; however, since Octave handles function objects differently from Matlab. Use the function sfo_octavize to make a submodular function object Octave ready; type 'help sfo_octavize' for more information. The script sfo_tutorial_octave has been tested under Octave 3.2.3</p><p><b>Some information on conventions:</b></p><p>All algorithms will use function objects. For example, to measure variance reduction in a Gaussian model, call   F = sfo_fn_varred(sigma,V) where sigma is the covariance matrix and V is the ground set, e.g., 1:size(sigma,1) (see examples below). They will also take an index set V, and A must be a subset of V.</p><p><b>Implemented algorithms:</b></p><p><b>1) Minimization:</b></p><div><ul><li><tt>sfo_min_norm_point</tt>: Fujishige's minimum-norm-point algorithm for minimizing       general submodular functions</li><li><tt>sfo_queyranne</tt>: Queyranne's algorithm for minimizing symmetric submodular       functions</li><li><tt>sfo_ssp</tt>: Submodular-supermodular procedure of Narasimhan &amp; Bilmes for       minimizing the difference of two submodular functions</li><li><tt>sfo_s_t_min_cut</tt>: For solving min F(A) s.t. s in A, t not in A</li><li><tt>sfo_minbound</tt>: Return an online bound on the minimum solution</li><li><tt>sfo_greedy_splitting</tt>: Greedy splitting algorithm for clustering of       Zhao et al</li></ul></div><p><b>2) Maximization:</b></p><div><ul><li><tt>sfo_polyhedrongreedy</tt>: For solving an LP over the submodular polytope</li><li><tt>sfo_greedy_lazy</tt>: The greedy algorithm for constrained maximization /       coverage using lazy evaluations</li><li><tt>sfo_greedy_welfare</tt>: The greedy algorithm for maximizing subject to a       partition matroid constraint</li><li><tt>sfo_cover</tt>: Greedy coverage algorithm using lazy evaluations</li><li><tt>sfo_celf</tt>: The CELF algorithm of Leskovec et al. for budgeted       maximization</li><li><tt>sfo_ls_lazy</tt>: Local search algorithm for maximizing nonnegative submodular functions</li><li><tt>sfo_saturate</tt>: The <i>SATURATE</i> algorithm of Krause et al. for robust optimization of submodular       functions</li><li><tt>sfo_max_dca_lazy</tt>: The Data Correcting algorithm of Goldengorin et al. for       maximizing general (not necessarily nondecreasing) submodular functions</li><li><tt>sfo_maxbound</tt>: Return an online bound on the maximum solution</li><li><tt>sfo_pspiel</tt>: The pSPIEL algorithm for Krause et al. for trading off information and communication cost</li><li><tt>sfo_pspiel_orienteering</tt>: The pSPIEL algorithm for Krause et al. for submodular orienteering</li><li><tt>sfo_balance</tt>: eSPASS algorithm of Krause et al. for simultaneous placement and balanced scheduling</li></ul></div><p><b>3) Miscellaneous</b></p><div><ul><li><tt>sfo_lovaszext</tt>: Computes the Lovasz extension for a submodular function</li><li><tt>sfo_mi_cluster</tt>: Example clustering algorithm using both maximization and       minimization</li><li><tt>sfo_pspiel_get_path</tt>: Convert a tree into a path using the MST heuristic       algorithm</li><li><tt>sfo_pspiel_get_cost</tt>: Compute the Steiner cost of a tree / path</li></ul></div><p><b>4) Submodular functions:</b></p><div><ul><li><tt>sfo_fn_cutfun</tt>: Cut function</li><li><tt>sfo_fn_detect</tt>: Outbreak detection / facility location</li><li><tt>sfo_fn_entropy</tt>: Entropy of Gaussian random variables</li><li><tt>sfo_fn_infogain</tt>: Information gain about gaussian random variables</li><li><tt>sfo_fn_mi</tt>: Gaussian mutual information</li><li><tt>sfo_fn_varred</tt>: Variance reduction (truncatable, for use in <i>SATURATE</i>)</li><li><tt>sfo_fn_example</tt>: Two-element submodular function example from tutorial       slides</li><li><tt>sfo_fn_iwata</tt>: Iwata's test function for testing minimization code</li><li><tt>sfo_fn_ising</tt>: Energy function for Ising model for image denoising</li><li><tt>sfo_fn_residual</tt>: For defining residual submodular functions</li><li><tt>sfo_fn_invert</tt>: For defining F(A) = F'(V\A)-'F(V)</li><li><tt>sfo_fn_lincomb</tt>: For defining linear combinations of submodular functions</li></ul></div><p>Here is an overview reference:</p><p>If you use the toolbox for your research, please cite A. Krause. "SFO: A Toolbox for Submodular Function Optimization". Journal   of Machine Learning Research (2010).</p><p>A. Krause, C. Guestrin. <i>Near-optimal Observation Selection Using Submodular Functions</i>.   Survey paper, Proc. of 22nd Conference on Artificial Intelligence (AAAI) 2007 -- Nectar Track</p><p><b>Change log</b></p><p>Version 2.0 * Modified specification of optional parameters (using sfo_opt) * Added sfo_ls_lazy for maximizing nonnegative submodular functions * Added sfo_fn_infogain, sfo_fn_lincomb, sfo_fn_invert, ... * Added additional documentation and more examples * Now Octave ready</p><p>Version 1.1 * added pSPIEL for informative path planning * added eSPASS for simultaneous placement and scheduling * new convention for submodular functions (incremental computations,   etc.) Much faster!</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">PART 1) MINIMIZATION OF SUBMODULAR FUNCTIONS</a></li><li><a href="#3">Queyranne's algorithm for minimizing symmetric submodular functions</a></li><li><a href="#6">Minimizing general submodular functions</a></li><li><a href="#8">Finding a minimum s-t-cut using general submodular function minimization</a></li><li><a href="#12">Clustering using mutual information</a></li><li><a href="#19">Image denoising using submodular function minimization</a></li><li><a href="#28">PART 2) MAXIMIZATION OF SUBMODULAR FUNCTIONS</a></li><li><a href="#29">The lazy greedy algorithm</a></li><li><a href="#39">Optimizing greedily over matroids</a></li><li><a href="#42">The lazy greedy coverage algorithm</a></li><li><a href="#45">The CELF algorithm for budgeted maximization</a></li><li><a href="#49">Submodular-supermodular procedure of Narasimhan &amp; Bilmes</a></li><li><a href="#52">The Data-Correcting algorithm for maximizing general submodular functions</a></li><li><a href="#55">The SATURATE algorithm for robust optimization</a></li><li><a href="#61">The pSPIEL Algorithm for trading off accuracy and communication cost</a></li><li><a href="#68">The eSPASS algorithm for simultaneous placement and scheduling.</a></li><li><a href="#72">PART 3) MISCELLANEOUS OTHER FUNCTIONS</a></li><li><a href="#73">The Lovasz extension</a></li><li><a href="#77">Bounds on optimal solution for minimization</a></li><li><a href="#79">The polyhedron greedy algorithm</a></li></ul></div><pre class="codeinput">clear
+randn(<span class="string">'state'</span>,0); rand(<span class="string">'state'</span>,0);
+</pre><h2>PART 1) MINIMIZATION OF SUBMODULAR FUNCTIONS<a name="2"></a></h2><h2>Queyranne's algorithm for minimizing symmetric submodular functions<a name="3"></a></h2><p>We will first explore Queyranne's algorithm for minimizing a symmetric submodular function.</p><p><b>Example</b>: F is a cut function on an undirected graph with adjacency matrix G_un on vertices V_G:</p><pre class="codeinput">G_un=[0 1 1 0 0 0; 1 0 1 0 0 0; 1 1 0 1 0 0; 0 0 1 0 1 1; 0 0 0 1 0 1; 0 0 0 1 1 0]
+V_G = 1:6;
+</pre><pre class="codeoutput">
+G_un =
+
+     0     1     1     0     0     0
+     1     0     1     0     0     0
+     1     1     0     1     0     0
+     0     0     1     0     1     1
+     0     0     0     1     0     1
+     0     0     0     1     1     0
+
+</pre><p>Here's the cut function:</p><pre class="codeinput">F_cut_un = sfo_fn_cutfun(G_un);
+</pre><p>Now we can run Queyranne's algorithm, which will return the minimum cut in graph G_un:</p><pre class="codeinput">A = sfo_queyranne(F_cut_un,V_G)
+</pre><pre class="codeoutput">
+A =
+
+     4     5     6
+
+</pre><h2>Minimizing general submodular functions<a name="6"></a></h2><p>We can also minimize general (not necessarily symmetric) submodular functions. This toolbox implements Fujishige's min-norm-point algorithm. We try it out on a test function by Iwata, described, e.g., in Fujishige et al. 06, on a set of size 100</p><pre class="codeinput">V_iw = 1:100;
+F_iw = sfo_fn_iwata(length(V_iw));
+</pre><p>Now let's run the algorithm:</p><pre class="codeinput">A = sfo_min_norm_point(F_iw,V_iw)
+</pre><pre class="codeoutput">suboptimality bound: -11571.000000 &lt;= min_A F(A) &lt;= F(A_best) = -6669.000000; delta&lt;=4902.000000
+suboptimality bound: -6834.000000 &lt;= min_A F(A) &lt;= F(A_best) = -6834.000000; delta&lt;=0.000000
+suboptimality bound: -6834.000000 &lt;= min_A F(A) &lt;= F(A_best) = -6834.000000; delta&lt;=0.000000
+
+A =
+
+  Columns 1 through 17
+
+    34    35    36    37    38    39    40    41    42    43    44    45    46    47    48    49    50
+
+  Columns 18 through 34
+
+    51    52    53    54    55    56    57    58    59    60    61    62    63    64    65    66    67
+
+  Columns 35 through 51
+
+    68    69    70    71    72    73    74    75    76    77    78    79    80    81    82    83    84
+
+  Columns 52 through 67
+
+    85    86    87    88    89    90    91    92    93    94    95    96    97    98    99   100
+
+</pre><h2>Finding a minimum s-t-cut using general submodular function minimization<a name="8"></a></h2><p>Instead of unconstrained minimization</p><p><img src="sfo_tutorial_pub_eq63351.png" alt="$$\min_A F(A)$$"></p><p>we can also solve</p><p><img src="sfo_tutorial_pub_eq79717.png" alt="$$\min_A F(A) \mbox{ s.t. }s \in A \mbox{ and } t \notin A $$"></p><p><b>Example</b>: We want to find minimum s-t-cuts in a directed graph with adjacency matrix:</p><pre class="codeinput">G_dir=[0 1 1.2 0 0 0; 1.3 0 1.4 0 0 0; 1.5 1.6 0 1.7 0 0; 0 0 1.8 0 1.9 2; 0 0 0 2.1 0 2.2; 0 0 0 2.3 2.4 0]
+</pre><pre class="codeoutput">
+G_dir =
+
+         0    1.0000    1.2000         0         0         0
+    1.3000         0    1.4000         0         0         0
+    1.5000    1.6000         0    1.7000         0         0
+         0         0    1.8000         0    1.9000    2.0000
+         0         0         0    2.1000         0    2.2000
+         0         0         0    2.3000    2.4000         0
+
+</pre><p>We define the directed cut function:</p><pre class="codeinput">F_cut_dir = sfo_fn_cutfun(G_dir);
+</pre><p>Now let's try to find the minimum cut separating node 1 and 6 in graph G_dir:</p><pre class="codeinput">A16 = sfo_s_t_mincut(F_cut_dir,V_G,1,6)
+</pre><pre class="codeoutput">suboptimality bound: -0.900000 &lt;= min_A F(A) &lt;= F(A_best) = 2.100000; delta&lt;=3.000000
+suboptimality bound: -0.500000 &lt;= min_A F(A) &lt;= F(A_best) = -0.500000; delta&lt;=0.000000
+suboptimality bound: -0.500000 &lt;= min_A F(A) &lt;= F(A_best) = -0.500000; delta&lt;=0.000000
+suboptimality bound: -0.500000 &lt;= min_A F(A) &lt;= F(A_best) = -0.500000; delta&lt;=0.000000
+
+A16 =
+
+     2     3     1
+
+</pre><p>Now let's separate node 4 and 6:</p><pre class="codeinput">A46 = sfo_s_t_mincut(F_cut_dir,V_G,4,6)
+</pre><pre class="codeoutput">suboptimality bound: -4.400000 &lt;= min_A F(A) &lt;= F(A_best) = 1.300000; delta&lt;=5.700000
+suboptimality bound: -1.800000 &lt;= min_A F(A) &lt;= F(A_best) = -1.800000; delta&lt;=0.000000
+suboptimality bound: -1.800000 &lt;= min_A F(A) &lt;= F(A_best) = -1.800000; delta&lt;=-0.000000
+suboptimality bound: -1.800000 &lt;= min_A F(A) &lt;= F(A_best) = -1.800000; delta&lt;=0.000000
+
+A46 =
+
+     1     2     3     4
+
+</pre><h2>Clustering using mutual information<a name="12"></a></h2><p>Now we use the Greedy Splitting algorithm for clustering. We first generate 30 data points at random:</p><pre class="codeinput">n = 10; C1 = randn(2,n)+5; C2 = randn(2,n); C3 = randn(2,n)-5; X = [C1';C2';C3'];
+</pre><p>Here's the data points:</p><pre class="codeinput">figure
+plot(X(:,1),X(:,2),<span class="string">'b.'</span>); hold <span class="string">on</span>
+</pre><img vspace="5" hspace="5" src="sfo_tutorial_pub_01.png" alt=""> <p>Now we use a Gaussian kernel function to measure similarity of the data points:</p><pre class="codeinput">D = dist(X')/2; sigma_cl = exp(-D.^2)+eye(3*n)*.01;
+</pre><p>These points will make up our ground set V:</p><pre class="codeinput">V = 1:(3*n);
+</pre><p>We use entropy as a measure of cluster inhomogeneity:</p><pre class="codeinput">E = sfo_fn_entropy(sigma_cl,V);
+</pre><p>Now do greedy splitting with 2 clusters:</p><pre class="codeinput">P = sfo_greedy_splitting(E,V,2)
+figure
+plot(X(P{1},1),X(P{1},2),<span class="string">'bx'</span>); hold <span class="string">on</span>
+plot(X(P{2},1),X(P{2},2),<span class="string">'ro'</span>);
+</pre><pre class="codeoutput">iteration 1, cluster 1
+
+P = 
+
+    [1x10 double]    [1x20 double]
+
+</pre><img vspace="5" hspace="5" src="sfo_tutorial_pub_02.png" alt=""> <p>Now do greedy splitting with 3 clusters:</p><pre class="codeinput">P = sfo_greedy_splitting(E,V,3)
+
+figure
+plot(X(P{1},1),X(P{1},2),<span class="string">'bx'</span>); hold <span class="string">on</span>
+plot(X(P{2},1),X(P{2},2),<span class="string">'ro'</span>);
+plot(X(P{3},1),X(P{3},2),<span class="string">'ks'</span>); hold <span class="string">off</span>
+</pre><pre class="codeoutput">iteration 1, cluster 1
+iteration 2, cluster 1
+iteration 2, cluster 2
+
+P = 
+
+    [1x10 double]    [1x10 double]    [1x10 double]
+
+</pre><img vspace="5" hspace="5" src="sfo_tutorial_pub_03.png" alt=""> <h2>Image denoising using submodular function minimization<a name="19"></a></h2><p>We will now do inference in a Markov Random Field using submodular function minimization.</p><p>Let's create a binary image of size 40x40, with a white square in front: of a black square</p><pre class="codeinput">D = 40; S = 10;
+img = zeros(D); img(S:(D-S),S:(D-S))=1;
+</pre><p>now we perturb it with 20% noise:</p><pre class="codeinput">noiseProb = 0.2;
+mask = rand(size(img))&gt;(1-noiseProb);
+imgN = img; imgN(mask)=1-imgN(mask);
+</pre><p>Our ground set will be the set of all pixels:</p><pre class="codeinput">V = 1:numel(img);
+</pre><p>Here's the original image and the noisy copy:</p><pre class="codeinput">figure;
+subplot(121); imshow(img); title(<span class="string">'original image'</span>)
+subplot(122); imshow(imgN); title(<span class="string">'noisy image'</span>)
+</pre><img vspace="5" hspace="5" src="sfo_tutorial_pub_04.png" alt=""> <p>We define potential functions for the Markov Random Field (ising model). Here, coeffPix is the coefficient for the pixel potentials, the other coefficients enforce smoothness.</p><pre class="codeinput">coeffPix = 1; coeffH = 1; coeffV = 1; coeffD = .0;
+</pre><p>Now we define a submodular function measuring the "energy" of smooth approximations to the noisy image imgN:</p><pre class="codeinput">F = sfo_fn_ising(imgN, coeffPix, coeffH, coeffV, coeffD);
+</pre><p>Initialize with noisy image:</p><pre class="codeinput">Ainit = find(imgN(:));
+</pre><p>Now we minimize F using the min-norm-point algorithm. We allow ourselves to be at most 1 unit of energy (1 pixel) off the optimal solution:</p><pre class="codeinput">callback = [];
+opt = sfo_opt({<span class="string">'minnorm_init'</span>,Ainit,<span class="string">'minnorm_stopping_thresh'</span>,3.999,<span class="string">'minnorm_callback'</span>,callback});
+tic; AD = sfo_min_norm_point(F,V,opt); toc
+</pre><pre class="codeoutput">suboptimality bound: -843.000000 &lt;= min_A F(A) &lt;= F(A_best) = 1725.000000; delta&lt;=2568.000000
+suboptimality bound: -327.513820 &lt;= min_A F(A) &lt;= F(A_best) = 789.000000; delta&lt;=1116.513820
+suboptimality bound: -250.470243 &lt;= min_A F(A) &lt;= F(A_best) = -19.000000; delta&lt;=231.470243
+suboptimality bound: -238.981194 &lt;= min_A F(A) &lt;= F(A_best) = -119.000000; delta&lt;=119.981194
+suboptimality bound: -232.609701 &lt;= min_A F(A) &lt;= F(A_best) = -126.000000; delta&lt;=106.609701
+suboptimality bound: -226.994977 &lt;= min_A F(A) &lt;= F(A_best) = -155.000000; delta&lt;=71.994977
+suboptimality bound: -220.836858 &lt;= min_A F(A) &lt;= F(A_best) = -167.000000; delta&lt;=53.836858
+suboptimality bound: -213.784843 &lt;= min_A F(A) &lt;= F(A_best) = -167.000000; delta&lt;=46.784843
+suboptimality bound: -206.959990 &lt;= min_A F(A) &lt;= F(A_best) = -175.000000; delta&lt;=31.959990
+suboptimality bound: -206.361698 &lt;= min_A F(A) &lt;= F(A_best) = -185.000000; delta&lt;=21.361698
+suboptimality bound: -205.753533 &lt;= min_A F(A) &lt;= F(A_best) = -187.000000; delta&lt;=18.753533
+suboptimality bound: -204.835702 &lt;= min_A F(A) &lt;= F(A_best) = -189.000000; delta&lt;=15.835702
+suboptimality bound: -203.340390 &lt;= min_A F(A) &lt;= F(A_best) = -191.000000; delta&lt;=12.340390
+suboptimality bound: -201.515647 &lt;= min_A F(A) &lt;= F(A_best) = -191.000000; delta&lt;=10.515647
+suboptimality bound: -200.872117 &lt;= min_A F(A) &lt;= F(A_best) = -191.000000; delta&lt;=9.872117
+suboptimality bound: -199.959495 &lt;= min_A F(A) &lt;= F(A_best) = -191.000000; delta&lt;=8.959495
+suboptimality bound: -198.246040 &lt;= min_A F(A) &lt;= F(A_best) = -191.000000; delta&lt;=7.246040
+suboptimality bound: -196.203150 &lt;= min_A F(A) &lt;= F(A_best) = -191.000000; delta&lt;=5.203150
+suboptimality bound: -195.752745 &lt;= min_A F(A) &lt;= F(A_best) = -191.000000; delta&lt;=4.752745
+suboptimality bound: -195.352582 &lt;= min_A F(A) &lt;= F(A_best) = -191.000000; delta&lt;=4.352582
+suboptimality bound: -194.957251 &lt;= min_A F(A) &lt;= F(A_best) = -191.000000; delta&lt;=3.957251
+suboptimality bound: -194.957251 &lt;= min_A F(A) &lt;= F(A_best) = -191.000000; delta&lt;=3.957251
+Elapsed time is 11.902548 seconds.
+</pre><p>Now let's plot the reconstruction:</p><pre class="codeinput">imgD = zeros(size(img)); imgD(AD)=1;
+figure;
+subplot(131); imshow(img); title(<span class="string">'original image'</span>)
+subplot(132); imshow(imgN); title(<span class="string">'noisy image'</span>)
+subplot(133); imshow(imgD); title(<span class="string">'reconstructed image'</span>)
+</pre><img vspace="5" hspace="5" src="sfo_tutorial_pub_05.png" alt=""> <h2>PART 2) MAXIMIZATION OF SUBMODULAR FUNCTIONS<a name="28"></a></h2><p>We can also (near-optimally) solve some maximization problems using submodular functions. We first study constrained optimization:</p><p><img src="sfo_tutorial_pub_eq49347.png" alt="$$\max_A F(A) \mbox{ s.t. }|A|\leq k$$"></p><h2>The lazy greedy algorithm<a name="29"></a></h2><p>We will first explore the lazy greedy algorithm on an experimental design problem. More specifically, we want to choose sensing locations to optimally predict pH values on a lake in Merced, California.</p><p>As objective function, we use the mutual information criterion of Caselton &amp; Zidek '84 based on a Gaussian Process that we trained on the pH data.</p><p>Let's load the data, which contains covariance matrix of the GP, merced_data.sigma, and locations (coordinates) merced_data.coords:</p><pre class="codeinput">load <span class="string">merced_data</span>;
+</pre><p>Define the ground set for the submodular functions:</p><pre class="codeinput">V_sigma = 1:size(merced_data.sigma,1);
+</pre><p>These correspond to the following locations that we can select for sensing:</p><pre class="codeinput">figure
+plot(merced_data.coords(:,1),merced_data.coords(:,2),<span class="string">'k.'</span>);
+xlabel(<span class="string">'Horizontal location along transect'</span>); ylabel(<span class="string">'Vertical location (depth)'</span>); title(<span class="string">'Possible sensing locations on the lake'</span>);
+</pre><img vspace="5" hspace="5" src="sfo_tutorial_pub_06.png" alt=""> <p>Here's the mutual information criterion:</p><p><img src="sfo_tutorial_pub_eq96754.png" alt="$$F_{mi}(A) = H(V\setminus A) - H(V\setminus A \mid A)$$"></p><pre class="codeinput">F_mi = sfo_fn_mi(merced_data.sigma,V_sigma);
+</pre><p><i><b>Note:</b> mutual information is submodular, but not monotonic! But for k &lt;&lt; n it's approximately monotonic, and that's enough (see Krause et al., JMLR '08).</i></p><p>We greedily pick 15 sensor locations for maximizing mutual information:</p><pre class="codeinput">k = 15;
+[A,scores,evals] = sfo_greedy_lazy(F_mi,V_sigma,k); A
+</pre><pre class="codeoutput">
+A =
+
+     4    15     3    37    82    34    63    35    81    83    60    40    17    19    76
+
+</pre><p>We can find out how many evaluations the naive greedy algorithm would have taken:</p><pre class="codeinput">nevals = sum(length(V_sigma):-1:(length(V_sigma)-k+1)); evals = sum(evals);
+disp(sprintf(<span class="string">'Lazy evaluations: %d, naive evaluations: %d, savings: %f%%'</span>,evals,nevals,100*(1-evals/nevals)));
+</pre><pre class="codeoutput">Lazy evaluations: 283, naive evaluations: 1185, savings: 76.118143%
+</pre><p>Now let's display the chosen locations:</p><pre class="codeinput">figure
+plot(merced_data.coords(:,1),merced_data.coords(:,2),<span class="string">'k.'</span>); hold <span class="string">on</span>
+plot(merced_data.coords(A,1),merced_data.coords(A,2),<span class="string">'bs'</span>,<span class="string">'markerfacecolor'</span>,<span class="string">'blue'</span>);
+xlabel(<span class="string">'Horizontal location along transect'</span>); ylabel(<span class="string">'Vertical location (depth)'</span>); title(<span class="string">'Chosen sensing locations (blue squares)'</span>);
+</pre><img vspace="5" hspace="5" src="sfo_tutorial_pub_07.png" alt=""> <p>We can also compute bounds on how far away the greedy solution is from the optimal solution:</p><pre class="codeinput">bound = sfo_maxbound(F_mi,V_sigma,A,k);
+disp(sprintf(<span class="string">'Greedy score F(A) = %f; \nNemhauser (1-1/e) bound: %f; \nOnline bound: %f'</span>,scores(end),scores(end)/(1-1/exp(1)),bound));
+</pre><pre class="codeoutput">Greedy score F(A) = 17.510471; 
+Nemhauser (1-1/e) bound: 27.701158; 
+Online bound: 25.974139
+</pre><p>Here's how the mutual information increases as we greedily pick more and more sensors:</p><pre class="codeinput">figure
+plot(0:k,[0 scores]); xlabel(<span class="string">'Number of elements'</span>); ylabel(<span class="string">'submodular utility'</span>);
+</pre><img vspace="5" hspace="5" src="sfo_tutorial_pub_08.png" alt=""> <h2>Optimizing greedily over matroids<a name="39"></a></h2><p><b>Sidenote</b>: We also can do greedy optimization over a matroid. To do that, we define a function that takes a set A and outputs 1 if A is independent, 0 otherwise.</p><p><b>Example</b>: The uniform matroid: A independent if and only if length(A)&lt;=k'</p><pre class="codeinput">opt = sfo_opt({<span class="string">'greedy_check_indep'</span>,(@(A) (length(A)&lt;=k))});
+</pre><p>Now let's run the greedy algorithm, given infinite budget:</p><pre class="codeinput">C = ones(1,length(V_sigma)); <span class="comment">% unit cost</span>
+[A,scores,evals] = sfo_greedy_lazy(F_mi,V_sigma,inf,opt); A
+</pre><pre class="codeoutput">
+A =
+
+     4    15     3    37    82    34    63    35    81    83    60    40    17    19    76
+
+</pre><h2>The lazy greedy coverage algorithm<a name="42"></a></h2><p>We can also use the greedy algorithm for solving problems of the form</p><p><img src="sfo_tutorial_pub_eq16454.png" alt="$$\min_A |A| \mbox{ s.t. } F(A)\geq Q$$"></p><p><b>Example</b>: Picking best sensor locations to achieve a specified amount of mutual information.</p><p>Here we want to achieve quota Q:</p><pre class="codeinput">Q = 5;
+</pre><p>Let's run the covering algorithm:</p><pre class="codeinput">[A,stat] = sfo_cover(F_mi,V_sigma,Q);
+disp(sprintf(<span class="string">'Coverage possible: %d, Cost: %f'</span>,stat,length(A))); A
+</pre><pre class="codeoutput">Coverage possible: 1, Cost: 3.000000
+
+A =
+
+     4    15     1
+
+</pre><p>Now let's try to shoot for a higher quota:</p><pre class="codeinput">Q = 30;
+[A,stat] = sfo_cover(F_mi,V_sigma,Q);
+disp(sprintf(<span class="string">'Coverage possible: %d, Cost: %f'</span>,stat,length(A))); A
+</pre><pre class="codeoutput">Coverage possible: 0, Cost: 38.000000
+
+A =
+
+  Columns 1 through 17
+
+     4    15     3    37    82    34    63    35    81    83    60    40    17    19    76    57    50
+
+  Columns 18 through 34
+
+    14    16    42    32    74    20    43    73    29    66     8    75    49    51    28    72    65
+
+  Columns 35 through 38
+
+    58    52    25    55
+
+</pre><h2>The CELF algorithm for budgeted maximization<a name="45"></a></h2><p>We can also near-optimally solve problems of the form</p><p><img src="sfo_tutorial_pub_eq86160.png" alt="$$\max_A F(A) \mbox{ s.t. } C(A)\leq B$$"></p><p>where C(A) is an additive cost function. Here, we just make up some cost function:</p><pre class="codeinput">C = 1:length(V_sigma);
+opt = sfo_opt({<span class="string">'cost'</span>,C});
+</pre><p>First use a small budget, B = 2. Here, the unit cost greedy solution is better.</p><pre class="codeinput">A = sfo_celf(F_mi,V_sigma,2,opt)
+</pre><pre class="codeoutput">Unit cost solution = 1.721224, Cost-benefit solution = 1.707856
+
+A =
+
+     2
+
+</pre><p>Now use a large budget, B = 15. Here, the cost/benefit greedy solution is better.</p><pre class="codeinput">A = sfo_celf(F_mi,V_sigma,15,opt)
+</pre><pre class="codeoutput">Unit cost solution = 3.815122, Cost-benefit solution = 4.386112
+
+A =
+
+     1     2     8     4
+
+</pre><p>CELF will always choose the better of unit cost or cost/benefit greedy solutions.</p><h2>Submodular-supermodular procedure of Narasimhan &amp; Bilmes<a name="49"></a></h2><p>The submodular-supermodular procedure is a general purpose algorithm for minimizing the difference between two submodular functions. The algorithm is guaranteed to converge to a locally optimal solution.</p><p>Here, we will use the submodular-supermodular procedure to do experimental design.</p><p>We want to choose subset A of sensor locations in the Lake Merced ph-estimation data set') that maximizes F_mi(A)-|A|, where F_mi is the mutual information criterion. We set F(A) = <tt>A</tt>, and G(A) = F_mi(A), and minimize F(A)-G(A)</p><pre class="codeinput">G = F_mi;
+F = sfo_fn_wrapper(@(A) length(A));
+</pre><p>Now let's run the submodular-supermodular procedure:</p><pre class="codeinput">A = sfo_ssp(F,G,V_sigma)
+disp(sprintf(<span class="string">'\n\nMutual information MI(A) = %f, Cost |A| = %d'</span>,G(A),F(A)));
+</pre><pre class="codeoutput">suboptimality bound: -2.328092 &lt;= min_A F(A) &lt;= F(A_best) = -2.328092; delta&lt;=-0.000000
+suboptimality bound: -2.328092 &lt;= min_A F(A) &lt;= F(A_best) = -2.328092; delta&lt;=0.000000
+suboptimality bound: -2.504810 &lt;= min_A F(A) &lt;= F(A_best) = -2.504810; delta&lt;=0.000000
+suboptimality bound: -2.504810 &lt;= min_A F(A) &lt;= F(A_best) = -2.504810; delta&lt;=0.000000
+suboptimality bound: -2.572455 &lt;= min_A F(A) &lt;= F(A_best) = -2.572455; delta&lt;=0.000000
+suboptimality bound: -2.572455 &lt;= min_A F(A) &lt;= F(A_best) = -2.572455; delta&lt;=0.000000
+suboptimality bound: -2.902415 &lt;= min_A F(A) &lt;= F(A_best) = -2.902415; delta&lt;=-0.000000
+suboptimality bound: -2.902415 &lt;= min_A F(A) &lt;= F(A_best) = -2.902415; delta&lt;=0.000000
+suboptimality bound: -2.942741 &lt;= min_A F(A) &lt;= F(A_best) = -2.942741; delta&lt;=0.000000
+suboptimality bound: -2.942741 &lt;= min_A F(A) &lt;= F(A_best) = -2.942741; delta&lt;=0.000000
+suboptimality bound: -2.942741 &lt;= min_A F(A) &lt;= F(A_best) = -2.942741; delta&lt;=0.000000
+suboptimality bound: -2.942741 &lt;= min_A F(A) &lt;= F(A_best) = -2.942741; delta&lt;=0.000000
+
+A =
+
+     2     5    11    34    37    76    84
+
+
+
+Mutual information MI(A) = 9.942741, Cost |A| = 7
+</pre><p>Let's again plot the chosen sensing locations:</p><pre class="codeinput">figure
+plot(merced_data.coords(:,1),merced_data.coords(:,2),<span class="string">'k.'</span>); hold <span class="string">on</span>
+plot(merced_data.coords(A,1),merced_data.coords(A,2),<span class="string">'b*'</span>,<span class="string">'markerfacecolor'</span>,<span class="string">'blue'</span>,<span class="string">'markersize'</span>,10);
+xlabel(<span class="string">'Horizontal location along transect'</span>); ylabel(<span class="string">'Vertical location (depth)'</span>); title(<span class="string">'Chosen locations by SSSP (blue stars)'</span>);
+</pre><img vspace="5" hspace="5" src="sfo_tutorial_pub_09.png" alt=""> <h2>The Data-Correcting algorithm for maximizing general submodular functions<a name="52"></a></h2><p>So far, we've seen algorithms for approximate maximization of submodular functions. We can also try to find the optimal solution (even though that could take exponential time).</p><p>The data-correcting algorithm is a branch and bound algorithm for solving</p><p><img src="sfo_tutorial_pub_eq56843.png" alt="$$\max_A F(A)$$"></p><p>up to a desired accuracy \delta.</p><p>Here, we will use the Data Correcting algorithm for finding a maximum directed cut in a graph:</p><pre class="codeinput">A = sfo_max_dca_lazy(F_cut_dir,V_G,0);
+disp(sprintf(<span class="string">'Cut value = %f'</span>,F_cut_dir(A)));
+</pre><pre class="codeoutput">new best solution: F(A) = 8.800000. Set = 4 2 6 
+new best solution: F(A) = 9.000000. Set = 1 3 6 
+new best solution: F(A) = 9.200000. Set = 2 3 6 
+new best solution: F(A) = 9.500000. Set = 6 3 
+Cut value = 9.500000
+</pre><p>We can also do constrained maximization, e.g., to find the best cut of size k:</p><p>To do that, we define a new submodular function that's -inf if length(A) &gt; k:</p><pre class="codeinput">FT = sfo_fn_wrapper(@(A) F_cut_dir(A) - 1e10*max(0,length(A)-1));
+</pre><p>Now let's run the data correcting algorithm:</p><pre class="codeinput">A = sfo_max_dca_lazy(FT,V_G,0);
+disp(sprintf(<span class="string">'Cut value = %f'</span>,FT(A)));
+</pre><pre class="codeoutput">new best solution: F(A) = 5.700000. Set = 4 
+Cut value = 5.700000
+</pre><h2>The SATURATE algorithm for robust optimization<a name="55"></a></h2><p><i>SATURATE</i> is a general purpose algorithm for approximately solving problems of the the form</p><p><img src="sfo_tutorial_pub_eq47611.png" alt="$$\max_A \min_i F_i(A) \mbox{ s.t. }|A|\leq k$$"></p><p>for a collection of monotonic submodular utility functions F_i.</p><p><b>Example</b>: Here let's use the <i>SATURATE</i> algorithm to minimize worst-case variance in GP regression on Merced Lake.</p><p>First pick 10 locations greedily using the greedy algorithm:</p><pre class="codeinput">k = 10;
+</pre><p>As objective function, we use variance reduction:</p><p><img src="sfo_tutorial_pub_eq28874.png" alt="$$ F_{var}(A) = Var(V)-Var(V \mid A)$$"></p><pre class="codeinput">F_var = sfo_fn_varred(merced_data.sigma,V_sigma);
+</pre><p><i><b>Note</b>: Variance reduction is not always submodular, but under certain conditions on the covariance matrix (see Das &amp; Kempe, STOC '08).</i></p><p>We now use the greedy algorithm to minimize the <i>average</i> variance:</p><pre class="codeinput">AG = sfo_greedy_lazy(F_var,V_sigma,k)
+</pre><pre class="codeoutput">
+AG =
+
+    24    66    41    12    82    51    15    63    73    34
+
+</pre><p>Now let's use the <i>SATURATE</i> algorithm to minimize the <i>worst case</i> variance.</p><pre class="codeinput">AS = sfo_saturate(F_var,V_sigma,k,<span class="string">'minthresh'</span>)
+</pre><pre class="codeoutput">interval [0.000000,0.251001], size(ssetMax,Min)=0,0
+interval [0.000000,0.125500], size(ssetMax,Min)=10,0
+interval [0.062750,0.125500], size(ssetMax,Min)=10,11
+interval [0.094125,0.125500], size(ssetMax,Min)=10,11
+interval [0.109813,0.125500], size(ssetMax,Min)=10,11
+interval [0.109813,0.117657], size(ssetMax,Min)=10,11
+interval [0.113735,0.117657], size(ssetMax,Min)=10,11
+interval [0.115696,0.117657], size(ssetMax,Min)=10,11
+interval [0.116676,0.117657], size(ssetMax,Min)=10,11
+interval [0.116676,0.117166], size(ssetMax,Min)=10,11
+interval [0.116676,0.116921], size(ssetMax,Min)=10,11
+interval [0.116799,0.116921], size(ssetMax,Min)=10,11
+interval [0.116860,0.116921], size(ssetMax,Min)=10,11
+interval [0.116860,0.116891], size(ssetMax,Min)=10,11
+interval [0.116875,0.116891], size(ssetMax,Min)=10,11
+interval [0.116883,0.116891], size(ssetMax,Min)=10,11
+interval [0.116887,0.116891], size(ssetMax,Min)=10,11
+
+AS =
+
+    31    70    49    16    81    72    55    22    83    58
+
+</pre><p>Here's the locations selected by both algorithms:</p><pre class="codeinput">figure
+plot(merced_data.coords(:,1),merced_data.coords(:,2),<span class="string">'k.'</span>); hold <span class="string">on</span>
+plot(merced_data.coords(AG,1),merced_data.coords(AG,2),<span class="string">'bs'</span>,<span class="string">'markerfacecolor'</span>,<span class="string">'blue'</span>);
+xlabel(<span class="string">'Horizontal location along transect'</span>); ylabel(<span class="string">'Vertical location (depth)'</span>); title(<span class="string">'Greedy locations (blue squares) and SATURATE locations (green diamonds)'</span>);
+plot(merced_data.coords(AS,1),merced_data.coords(AS,2),<span class="string">'gd'</span>,<span class="string">'markerfacecolor'</span>,<span class="string">'green'</span>);hold <span class="string">off</span>
+</pre><img vspace="5" hspace="5" src="sfo_tutorial_pub_10.png" alt=""> <p>Here's the maximum remaining variance under both solutions:</p><pre class="codeinput">disp(sprintf(<span class="string">'max remaining variance: Greedy = %f, SATURATE = %f'</span>,sfo_eval_maxvar(merced_data.sigma,AG),sfo_eval_maxvar(merced_data.sigma,AS)));
+</pre><pre class="codeoutput">max remaining variance: Greedy = 0.157456, SATURATE = 0.116974
+</pre><h2>The pSPIEL Algorithm for trading off accuracy and communication cost<a name="61"></a></h2><p>pSPIEL is an algorithm for maximizing monotonic submodular functions subject to complex cost functions.</p><p>We will use the pSPIEL algorithm to trade off informativeness and communication cost in GP regression on Merced Lake</p><p>Let us set up a distance matrix D. The cost of a link is 1 + the Euclidean distance between the connected locations. Hence the cost of a set A is the cost of connecting A using links + the number of nodes in A</p><pre class="codeinput">D = merced_data.dists + ones(length(V_sigma));
+</pre><p>We attempt to find a tree which obtains 60 percent of the total variance reduction:</p><pre class="codeinput">Q = 0.6*F_var(V_sigma);
+</pre><p>We first run the greedy algorithm, ignoring cost</p><pre class="codeinput">AG = sfo_cover(F_var,V_sigma,Q)
+</pre><pre class="codeoutput">
+AG =
+
+    24    66    41    12    82    11
+
+</pre><p>We now run pSPIEL for cost-benefit optimization:</p><pre class="codeinput">AP = sfo_pspiel(F_var,V_sigma,Q,D)
+</pre><pre class="codeoutput">iteration 1: best cost = 56.297951, R = 132.022152, v = 0.153283, c = 56.297951
+iteration 2: best cost = 56.297951, R = 4.605551, v = 0.160516, c = 59.060082
+iteration 3: best cost = 55.470139, R = 4.059412, v = 0.151528, c = 55.470139
+iteration 4: best cost = 55.470139, R = 4.059412, v = 0.167110, c = 65.698862
+iteration 5: best cost = 47.331337, R = 22.077002, v = 0.153793, c = 47.331337
+iteration 6: best cost = 47.331337, R = 10.004999, v = 0.150945, c = 50.435689
+iteration 7: best cost = 47.331337, R = 1.600000, v = 0.168214, c = 99.356272
+iteration 8: best cost = 47.331337, R = 10.044888, v = 0.151826, c = 48.668915
+iteration 9: best cost = 47.331337, R = 4.605551, v = 0.151595, c = 55.470417
+iteration 10: best cost = 47.331337, R = 10.044888, v = 0.154795, c = 57.312821
+
+AP =
+
+    31    70    49    26    29    81    51
+
+</pre><p>Now we compute the utility obtained by both solutions</p><pre class="codeinput">utility_greedy = F_var(AG)
+utility_pspiel = F_var(AP)
+</pre><pre class="codeoutput">
+utility_greedy =
+
+    0.1511
+
+
+utility_pspiel =
+
+    0.1538
+
+</pre><p>We also compute the cost of both solutions</p><pre class="codeinput">[cost_greedy edges_greedy steiner_greedy] = sfo_pspiel_get_cost(AG,D);
+[cost_pspiel edges_pspiel steiner_pspiel]= sfo_pspiel_get_cost(AP,D);
+cost_greedy
+cost_pspiel
+</pre><pre class="codeoutput">
+cost_greedy =
+
+   59.4742
+
+
+cost_pspiel =
+
+   47.3313
+
+</pre><p>Now we plot the obtained trees</p><pre class="codeinput">subplot(211);
+sfo_plot_subgraph(merced_data.coords,edges_greedy,steiner_greedy);
+title(<span class="string">'Greedy-connect'</span>);
+subplot(212);
+sfo_plot_subgraph(merced_data.coords,edges_pspiel,steiner_pspiel);
+title(<span class="string">'pSPIEL'</span>);
+</pre><img vspace="5" hspace="5" src="sfo_tutorial_pub_11.png" alt=""> <h2>The eSPASS algorithm for simultaneous placement and scheduling.<a name="68"></a></h2><p>The eSPASS algorithm near-optimally solves the problem</p><p><img src="sfo_tutorial_pub_eq70867.png" alt="$$\max_{A_1,\dots,A_m} \min_i F(A_i) \mbox{ s.t. } |A_1\cup\dots\cup A_m|\leq k$$"></p><p>I.e., it finds m disjoint sets, with a total of k elements, that perform equally well w.r.t. a monotonic submodular objective function F</p><p>We pick k = 20 sensor locations to activate at m = 5 timeslices</p><p>We first greedily optimize for the average case performance</p><pre class="codeinput">F_var = sfo_fn_varred(merced_data.sigma,V_sigma);
+Fs = {F_var,F_var,F_var,F_var,F_var};
+[A_sum,scores_sum] = sfo_greedy_welfare(Fs,V_sigma,20);
+</pre><p>Now we use the eSPASS algorithm to optimize for balanced performance:</p><pre class="codeinput">[A_min,scores_min] = sfo_balance(F_var,V_sigma,5,20);
+</pre><pre class="codeoutput">interval [0.000000,0.251001]
+interval [0.000000,0.125500]
+interval [0.062750,0.125500]
+interval [0.094125,0.125500]
+interval [0.109813,0.125500]
+interval [0.117657,0.125500]
+interval [0.117657,0.121579]
+interval [0.119618,0.121579]
+interval [0.120598,0.121579]
+interval [0.120598,0.121088]
+interval [0.120843,0.121088]
+interval [0.120966,0.121088]
+interval [0.121027,0.121088]
+interval [0.121027,0.121058]
+interval [0.121042,0.121058]
+interval [0.121042,0.121050]
+interval [0.121046,0.121050]
+interval [0.121046,0.121048]
+interval [0.121047,0.121048]
+interval [0.121048,0.121048]
+</pre><p>Let's compare the avg. case scores: Both algorithms perform similar</p><pre class="codeinput">disp(sprintf(<span class="string">'Mean scores: Greedy = %f, eSPASS = %f'</span>,mean(scores_sum),mean(scores_min)));
+</pre><pre class="codeoutput">Mean scores: Greedy = 0.129910, eSPASS = 0.128336
+</pre><p>Now we compare the min. score: eSPASS performs much better</p><pre class="codeinput">disp(sprintf(<span class="string">'Min scores: Greedy = %f, eSPASS = %f'</span>,min(scores_sum),min(scores_min)));
+</pre><pre class="codeoutput">Min scores: Greedy = 0.114766, eSPASS = 0.121048
+</pre><h2>PART 3) MISCELLANEOUS OTHER FUNCTIONS<a name="72"></a></h2><p>The toolbox also provides some other functions that are useful when working with submodular functions.</p><h2>The Lovasz extension<a name="73"></a></h2><p>Every submodular function F induces a convex function, the <i>Lovasz extension</i>, which generalizes F to the unit cube (and the positive orthant).</p><p>We will explore the Lovasz extension on the 2 element example function from the tutorial slides at <a href="http://www.submodularity.org">http://www.submodularity.org</a>:</p><p><img src="sfo_tutorial_pub_eq82442.png" alt="$$F{\emptyset} = 0;\; F(\{a\}) = -1;\; F(\{b\}) = 2;\; F(\{a,b\}) = 0$$"></p><pre class="codeinput">F_ex = sfo_fn_example;
+V_ex = 1:2;
+</pre><p>We can now define the Lovasz extension:</p><pre class="codeinput">g = @(w) sfo_lovaszext(F_ex,V_ex,w);
+</pre><p>Now we want to compate F_ex({b}) which should equal g([0,1]). Let's first compute the characteristic vector for set A={b}:</p><pre class="codeinput">A = [2];
+w = sfo_charvector(V_ex,A)
+<span class="comment">% Now we comparing the function F_ex(A) with Lovasz extension g(w):</span>
+disp(sprintf(<span class="string">'A = {b};   F(A) = %f;   g(wA) = %f'</span>,F_ex(A),g(w)));
+</pre><pre class="codeoutput">
+w =
+
+     0     1
+
+A = {b};   F(A) = 2.000000;   g(wA) = 2.000000
+</pre><p>Now we plot the Lovasz extension:</p><pre class="codeinput">[X,Y] = meshgrid(0:.05:1,0:.05:1);
+Z = zeros(size(X));
+<span class="keyword">for</span> i = 1:size(X,1)
+    <span class="keyword">for</span> j = 1:size(X,2)
+       Z(i,j) = g([X(i,j),Y(i,j)]);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+figure
+surf(X,Y,Z)
+xlabel(<span class="string">'w_{a}'</span>); ylabel(<span class="string">'w_{b}'</span>); zlabel(<span class="string">'g(w)'</span>)
+title(<span class="string">'Lovasz extension for example from tutorial: F(\{\})=0,F(\{a\})=-1,F(\{b\})=2,F(\{a,b\})=0 '</span>);
+</pre><img vspace="5" hspace="5" src="sfo_tutorial_pub_12.png" alt=""> <h2>Bounds on optimal solution for minimization<a name="77"></a></h2><p>We can also get bounds on the optimal solution for minimization. Let's suppose we guessed solution A={a}:</p><pre class="codeinput">A = [1];
+</pre><p>Let's compute the bound:</p><pre class="codeinput">bound = sfo_minbound(F_ex,V_ex,A);
+disp(sprintf(<span class="string">'bound = %f &lt;= min F(A) &lt;= F(B) = %f; ==&gt; A is optimal!'</span>,bound,F_ex(A)));
+</pre><pre class="codeoutput">bound = -1.000000 &lt;= min F(A) &lt;= F(B) = -1.000000; ==&gt; A is optimal!
+</pre><h2>The polyhedron greedy algorithm<a name="79"></a></h2><p>Here's an example of the polyhedron greedy algorithm that solves the LP</p><p><img src="sfo_tutorial_pub_eq11577.png" alt="$$\max_x w^T x\mbox{ s.t. } x\in P_F$$"></p><p>Let's start with set A = {a}:</p><pre class="codeinput">A = [1];
+</pre><p>Get the characteristic vector:</p><pre class="codeinput">w = sfo_charvector(V_ex,A);
+</pre><p>Run the polyhedron greedy algorithm:</p><pre class="codeinput">xw = sfo_polyhedrongreedy(F_ex,V_ex,w)
+</pre><pre class="codeoutput">
+xw =
+
+    -1     1
+
+</pre><p>And now it should hold that</p><p><img src="sfo_tutorial_pub_eq52150.png" alt="$$w^T x_w = F(A) = -1$$"></p><pre class="codeinput">w*xw'
+</pre><pre class="codeoutput">
+ans =
+
+    -1
+
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.9<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Matlab Toolbox for Submodular Function Optimization (v 2.0)
+% 
+% Tutorial script and all implementations Andreas Krause
+% (krausea@gmail.com). Slides, videos and detailed references available at
+% <http://www.submodularity.org>.
+% 
+% Tested in MATLAB 7.0.1 (R14), 7.2.0 (R2006a), 7.4.0 (R2007a, MAC).
+% 
+% *Welcome to this introduction!*
+% 
+% We will discuss how we can use the toolbox to optimize submodular set
+% functions, i.e., functions that take a subset A of a finite ground set V
+% to the real numbers, satisfying
+% 
+% $$F(A)+F(B)\geq F(A\cup B)+F(A\cap B)$$
+%
+% *A note on Octave compatibility:*
+%
+% This toolbox also works under Octave; however, since Octave handles
+% function objects differently from Matlab. Use the function sfo_octavize
+% to make a submodular function object Octave ready; 
+% type 'help sfo_octavize' for more information.
+% The script sfo_tutorial_octave has been tested under Octave 3.2.3
+% 
+% *Some information on conventions:*
+% 
+% All algorithms will use function objects.
+% For example, to measure variance reduction in a Gaussian model, call 
+%   F = sfo_fn_varred(sigma,V)
+% where sigma is the covariance matrix and V is the ground set, e.g., 1:size(sigma,1)
+% (see examples below).
+% They will also take an index set V, and A must be a subset of V.
+% 
+% *Implemented algorithms:*
+% 
+% *1) Minimization:*
+% 
+% * |sfo_min_norm_point|: Fujishige's minimum-norm-point algorithm for minimizing
+%       general submodular functions 
+% * |sfo_queyranne|: Queyranne's algorithm for minimizing symmetric submodular
+%       functions
+% * |sfo_ssp|: Submodular-supermodular procedure of Narasimhan & Bilmes for 
+%       minimizing the difference of two submodular functions
+% * |sfo_s_t_min_cut|: For solving min F(A) s.t. s in A, t not in A
+% * |sfo_minbound|: Return an online bound on the minimum solution
+% * |sfo_greedy_splitting|: Greedy splitting algorithm for clustering of 
+%       Zhao et al
+% 
+% *2) Maximization:*
+% 
+% * |sfo_polyhedrongreedy|: For solving an LP over the submodular polytope
+% * |sfo_greedy_lazy|: The greedy algorithm for constrained maximization /
+%       coverage using lazy evaluations
+% * |sfo_greedy_welfare|: The greedy algorithm for maximizing subject to a
+%       partition matroid constraint
+% * |sfo_cover|: Greedy coverage algorithm using lazy evaluations
+% * |sfo_celf|: The CELF algorithm of Leskovec et al. for budgeted
+%       maximization
+% * |sfo_ls_lazy|: Local search algorithm for maximizing nonnegative submodular functions
+% * |sfo_saturate|: The _SATURATE_ algorithm of Krause et al. for robust optimization of submodular
+%       functions
+% * |sfo_max_dca_lazy|: The Data Correcting algorithm of Goldengorin et al. for 
+%       maximizing general (not necessarily nondecreasing) submodular functions
+% * |sfo_maxbound|: Return an online bound on the maximum solution
+% * |sfo_pspiel|: The pSPIEL algorithm for Krause et al. for trading off information and communication cost
+% * |sfo_pspiel_orienteering|: The pSPIEL algorithm for Krause et al. for submodular orienteering
+% * |sfo_balance|: eSPASS algorithm of Krause et al. for simultaneous placement and balanced scheduling
+% 
+% *3) Miscellaneous*
+% 
+% * |sfo_lovaszext|: Computes the Lovasz extension for a submodular function
+% * |sfo_mi_cluster|: Example clustering algorithm using both maximization and
+%       minimization
+% * |sfo_pspiel_get_path|: Convert a tree into a path using the MST heuristic
+%       algorithm
+% * |sfo_pspiel_get_cost|: Compute the Steiner cost of a tree / path
+% 
+% *4) Submodular functions:*
+% 
+% * |sfo_fn_cutfun|: Cut function
+% * |sfo_fn_detect|: Outbreak detection / facility location
+% * |sfo_fn_entropy|: Entropy of Gaussian random variables
+% * |sfo_fn_infogain|: Information gain about gaussian random variables
+% * |sfo_fn_mi|: Gaussian mutual information
+% * |sfo_fn_varred|: Variance reduction (truncatable, for use in _SATURATE_)
+% * |sfo_fn_example|: Two-element submodular function example from tutorial
+%       slides
+% * |sfo_fn_iwata|: Iwata's test function for testing minimization code
+% * |sfo_fn_ising|: Energy function for Ising model for image denoising
+% * |sfo_fn_residual|: For defining residual submodular functions
+% * |sfo_fn_invert|: For defining F(A) = F'(V\A)-'F(V)
+% * |sfo_fn_lincomb|: For defining linear combinations of submodular functions
+% 
+% Here is an overview reference:
+% 
+% If you use the toolbox for your research, please cite
+% A. Krause. "SFO: A Toolbox for Submodular Function Optimization". Journal
+%   of Machine Learning Research (2010). 
+%
+% A. Krause, C. Guestrin. _Near-optimal Observation Selection Using Submodular Functions_. 
+%   Survey paper, Proc. of 22nd Conference on Artificial Intelligence (AAAI) 2007 REPLACE_WITH_DASH_DASH Nectar Track
+%
+% *Change log*
+%
+% Version 2.0
+% * Modified specification of optional parameters (using sfo_opt)
+% * Added sfo_ls_lazy for maximizing nonnegative submodular functions
+% * Added sfo_fn_infogain, sfo_fn_lincomb, sfo_fn_invert, ...
+% * Added additional documentation and more examples
+% * Now Octave ready
+%
+% Version 1.1
+% * added pSPIEL for informative path planning
+% * added eSPASS for simultaneous placement and scheduling
+% * new convention for submodular functions (incremental computations,
+%   etc.) Much faster!
+%
+
+%%
+clear
+randn('state',0); rand('state',0); 
+
+%% PART 1) MINIMIZATION OF SUBMODULAR FUNCTIONS
+
+%% Queyranne's algorithm for minimizing symmetric submodular functions
+% We will first explore Queyranne's algorithm for minimizing a symmetric
+% submodular function.
+%
+% *Example*: F is a cut function on an undirected graph with adjacency
+% matrix G_un on vertices V_G:
+G_un=[0 1 1 0 0 0; 1 0 1 0 0 0; 1 1 0 1 0 0; 0 0 1 0 1 1; 0 0 0 1 0 1; 0 0 0 1 1 0]
+V_G = 1:6;
+%% 
+% Here's the cut function:
+F_cut_un = sfo_fn_cutfun(G_un);
+%%
+% Now we can run Queyranne's algorithm, which will return the minimum cut
+% in graph G_un:
+A = sfo_queyranne(F_cut_un,V_G)
+
+%% Minimizing general submodular functions
+% We can also minimize general (not necessarily symmetric) submodular functions.
+% This toolbox implements Fujishige's min-norm-point algorithm.
+% We try it out on a test function by Iwata, described, e.g., in Fujishige
+% et al. 06, on a set of size 100
+V_iw = 1:100;
+F_iw = sfo_fn_iwata(length(V_iw));
+%%
+% Now let's run the algorithm:
+A = sfo_min_norm_point(F_iw,V_iw)
+
+%% Finding a minimum s-t-cut using general submodular function minimization
+% Instead of unconstrained minimization 
+%
+% $$\min_A F(A)$$
+% 
+% we can also solve 
+%
+% $$\min_A F(A) \mbox{ s.t. }s \in A \mbox{ and } t \notin A $$
+% 
+% *Example*: We want to find minimum s-t-cuts in a directed graph with
+% adjacency matrix:
+G_dir=[0 1 1.2 0 0 0; 1.3 0 1.4 0 0 0; 1.5 1.6 0 1.7 0 0; 0 0 1.8 0 1.9 2; 0 0 0 2.1 0 2.2; 0 0 0 2.3 2.4 0]
+%% 
+% We define the directed cut function:
+F_cut_dir = sfo_fn_cutfun(G_dir);
+%%
+% Now let's try to find the minimum cut separating node 1 and 6 in graph
+% G_dir:
+A16 = sfo_s_t_mincut(F_cut_dir,V_G,1,6)
+%%
+% Now let's separate node 4 and 6:
+A46 = sfo_s_t_mincut(F_cut_dir,V_G,4,6)
+
+
+
+%% Clustering using mutual information
+% Now we use the Greedy Splitting algorithm for clustering.
+% We first generate 30 data points at random:
+ 
+n = 10; C1 = randn(2,n)+5; C2 = randn(2,n); C3 = randn(2,n)-5; X = [C1';C2';C3'];
+%% 
+% Here's the data points:
+figure
+plot(X(:,1),X(:,2),'b.'); hold on
+%% 
+% Now we use a Gaussian kernel function to measure similarity of the data
+% points:
+D = dist(X')/2; sigma_cl = exp(-D.^2)+eye(3*n)*.01;
+%%
+% These points will make up our ground set V:
+V = 1:(3*n); 
+
+%% 
+% We use entropy as a measure of cluster inhomogeneity:
+E = sfo_fn_entropy(sigma_cl,V);
+%%
+% Now do greedy splitting with 2 clusters:
+P = sfo_greedy_splitting(E,V,2)
+figure
+plot(X(P{1},1),X(P{1},2),'bx'); hold on
+plot(X(P{2},1),X(P{2},2),'ro');
+
+%%
+% Now do greedy splitting with 3 clusters:
+P = sfo_greedy_splitting(E,V,3)
+
+figure
+plot(X(P{1},1),X(P{1},2),'bx'); hold on
+plot(X(P{2},1),X(P{2},2),'ro');
+plot(X(P{3},1),X(P{3},2),'ks'); hold off
+
+
+%% Image denoising using submodular function minimization
+% We will now do inference in a Markov Random Field using submodular
+% function minimization.
+%
+% Let's create a binary image of size 40x40, with a white square in front:
+% of a black square
+D = 40; S = 10; 
+img = zeros(D); img(S:(D-S),S:(D-S))=1;
+
+%% 
+% now we perturb it with 20% noise:
+noiseProb = 0.2; 
+mask = rand(size(img))>(1-noiseProb);
+imgN = img; imgN(mask)=1-imgN(mask);
+%%
+% Our ground set will be the set of all pixels:
+V = 1:numel(img);
+
+%%
+% Here's the original image and the noisy copy:
+figure; 
+subplot(121); imshow(img); title('original image')
+subplot(122); imshow(imgN); title('noisy image')
+
+%% 
+% We define potential functions for the Markov Random Field (ising model).
+% Here, coeffPix is the coefficient for the pixel potentials,
+% the other coefficients enforce smoothness.
+coeffPix = 1; coeffH = 1; coeffV = 1; coeffD = .0;
+
+%%
+% Now we define a submodular function measuring the "energy" of smooth
+% approximations to the noisy image imgN:
+F = sfo_fn_ising(imgN, coeffPix, coeffH, coeffV, coeffD);
+
+%%
+% Initialize with noisy image:
+Ainit = find(imgN(:));
+
+%%
+% Now we minimize F using the min-norm-point algorithm. We allow ourselves to be at
+% most 1 unit of energy (1 pixel) off the optimal solution:
+callback = [];
+opt = sfo_opt({'minnorm_init',Ainit,'minnorm_stopping_thresh',3.999,'minnorm_callback',callback});
+tic; AD = sfo_min_norm_point(F,V,opt); toc
+
+%%
+% Now let's plot the reconstruction:
+imgD = zeros(size(img)); imgD(AD)=1;
+figure; 
+subplot(131); imshow(img); title('original image')
+subplot(132); imshow(imgN); title('noisy image')
+subplot(133); imshow(imgD); title('reconstructed image')
+
+
+%% PART 2) MAXIMIZATION OF SUBMODULAR FUNCTIONS
+% We can also (near-optimally) solve some maximization problems using
+% submodular functions. We first study constrained optimization:
+%
+% $$\max_A F(A) \mbox{ s.t. }|A|\leq k$$
+%
+
+%% The lazy greedy algorithm
+% We will first explore the lazy greedy algorithm on an experimental design
+% problem. More specifically, we want to choose sensing locations to
+% optimally predict pH values on a lake in Merced, California.
+% 
+% As objective function, we use the mutual information criterion of
+% Caselton & Zidek '84 based on a Gaussian Process that we trained on the pH data. 
+%
+% Let's load the data, which contains covariance matrix of the GP, merced_data.sigma, 
+% and locations (coordinates) merced_data.coords:
+load merced_data;
+%%
+% Define the ground set for the submodular functions:
+V_sigma = 1:size(merced_data.sigma,1);
+%%
+% These correspond to the following locations that we can select for sensing:
+figure
+plot(merced_data.coords(:,1),merced_data.coords(:,2),'k.'); 
+xlabel('Horizontal location along transect'); ylabel('Vertical location (depth)'); title('Possible sensing locations on the lake');
+
+%%
+% Here's the mutual information criterion: 
+% 
+% $$F_{mi}(A) = H(V\setminus A) - H(V\setminus A \mid A)$$
+%
+F_mi = sfo_fn_mi(merced_data.sigma,V_sigma);
+%%
+% _*Note:* mutual information is submodular, but not monotonic! But for k << n it's
+% approximately monotonic, and that's enough (see Krause et al., JMLR '08)._
+
+%%
+% We greedily pick 15 sensor locations for maximizing mutual information:
+k = 15;
+[A,scores,evals] = sfo_greedy_lazy(F_mi,V_sigma,k); A
+%%
+% We can find out how many evaluations the naive greedy algorithm would
+% have taken:
+nevals = sum(length(V_sigma):-1:(length(V_sigma)-k+1)); evals = sum(evals);
+disp(sprintf('Lazy evaluations: %d, naive evaluations: %d, savings: %f%%',evals,nevals,100*(1-evals/nevals)));
+
+%%
+% Now let's display the chosen locations:
+figure
+plot(merced_data.coords(:,1),merced_data.coords(:,2),'k.'); hold on
+plot(merced_data.coords(A,1),merced_data.coords(A,2),'bs','markerfacecolor','blue');
+xlabel('Horizontal location along transect'); ylabel('Vertical location (depth)'); title('Chosen sensing locations (blue squares)');
+
+%%
+% We can also compute bounds on how far away the greedy solution is from
+% the optimal solution:
+bound = sfo_maxbound(F_mi,V_sigma,A,k);
+disp(sprintf('Greedy score F(A) = %f; \nNemhauser (1-1/e) bound: %f; \nOnline bound: %f',scores(end),scores(end)/(1-1/exp(1)),bound));
+
+%%
+% Here's how the mutual information increases as we greedily pick more and more
+% sensors:
+figure
+plot(0:k,[0 scores]); xlabel('Number of elements'); ylabel('submodular utility');
+
+%% Optimizing greedily over matroids
+% *Sidenote*: We also can do greedy optimization over a matroid.
+% To do that, we define a function that takes a set A and outputs 1 if A is
+% independent, 0 otherwise.
+%%
+% *Example*: The uniform matroid: A independent if and only if length(A)<=k'
+opt = sfo_opt({'greedy_check_indep',(@(A) (length(A)<=k))});
+%% 
+% Now let's run the greedy algorithm, given infinite budget:
+C = ones(1,length(V_sigma)); % unit cost
+[A,scores,evals] = sfo_greedy_lazy(F_mi,V_sigma,inf,opt); A
+
+%% The lazy greedy coverage algorithm
+% We can also use the greedy algorithm for solving problems of the form
+%
+% $$\min_A |A| \mbox{ s.t. } F(A)\geq Q$$
+%
+% *Example*: Picking best sensor locations to achieve a specified amount of
+% mutual information.
+%
+% Here we want to achieve quota Q:
+Q = 5;
+%%
+% Let's run the covering algorithm:
+[A,stat] = sfo_cover(F_mi,V_sigma,Q);
+disp(sprintf('Coverage possible: %d, Cost: %f',stat,length(A))); A
+
+%%
+% Now let's try to shoot for a higher quota:
+Q = 30;
+[A,stat] = sfo_cover(F_mi,V_sigma,Q);
+disp(sprintf('Coverage possible: %d, Cost: %f',stat,length(A))); A
+
+%% The CELF algorithm for budgeted maximization
+% We can also near-optimally solve problems of the form
+%
+% $$\max_A F(A) \mbox{ s.t. } C(A)\leq B$$
+%
+% where C(A) is an additive cost function.
+% Here, we just make up some cost function:
+C = 1:length(V_sigma);
+opt = sfo_opt({'cost',C}); 
+
+%%
+% First use a small budget, B = 2. Here, the unit cost greedy solution is better.
+A = sfo_celf(F_mi,V_sigma,2,opt)
+%%
+% Now use a large budget, B = 15. Here, the cost/benefit greedy solution is
+% better.
+A = sfo_celf(F_mi,V_sigma,15,opt)
+%%
+% CELF will always choose the better of unit cost or cost/benefit greedy
+% solutions.
+
+
+%% Submodular-supermodular procedure of Narasimhan & Bilmes
+% The submodular-supermodular procedure is a general purpose algorithm for
+% minimizing the difference between two submodular functions. The algorithm
+% is guaranteed to converge to a locally optimal solution.
+%
+% Here, we will use the submodular-supermodular procedure to do experimental
+% design.
+%
+% We want to choose subset A of sensor locations in the Lake Merced ph-estimation data set')
+% that maximizes F_mi(A)-|A|, where F_mi is the mutual information
+% criterion. 
+% We set F(A) = |A|, and G(A) = F_mi(A), and minimize F(A)-G(A)
+G = F_mi;
+F = sfo_fn_wrapper(@(A) length(A));
+%%
+% Now let's run the submodular-supermodular procedure:
+A = sfo_ssp(F,G,V_sigma)
+disp(sprintf('\n\nMutual information MI(A) = %f, Cost |A| = %d',G(A),F(A)));
+
+%%
+% Let's again plot the chosen sensing locations:
+figure
+plot(merced_data.coords(:,1),merced_data.coords(:,2),'k.'); hold on
+plot(merced_data.coords(A,1),merced_data.coords(A,2),'b*','markerfacecolor','blue','markersize',10);
+xlabel('Horizontal location along transect'); ylabel('Vertical location (depth)'); title('Chosen locations by SSSP (blue stars)');
+
+%% The Data-Correcting algorithm for maximizing general submodular functions
+% So far, we've seen algorithms for approximate maximization of submodular
+% functions. We can also try to find the optimal solution (even though that
+% could take exponential time).
+%
+% The data-correcting algorithm is a branch and bound algorithm for
+% solving
+%
+% $$\max_A F(A)$$
+%
+% up to a desired accuracy \delta.
+%
+% Here, we will use the Data Correcting algorithm for finding a maximum
+% directed cut in a graph:
+A = sfo_max_dca_lazy(F_cut_dir,V_G,0);
+disp(sprintf('Cut value = %f',F_cut_dir(A)));
+
+%%
+% We can also do constrained maximization, e.g., to find the best cut of
+% size k:
+%
+% To do that, we define a new submodular function that's -inf if length(A) > k:
+FT = sfo_fn_wrapper(@(A) F_cut_dir(A) - 1e10*max(0,length(A)-1));
+%% 
+% Now let's run the data correcting algorithm:
+A = sfo_max_dca_lazy(FT,V_G,0);
+disp(sprintf('Cut value = %f',FT(A)));
+
+
+%% The SATURATE algorithm for robust optimization
+% _SATURATE_ is a general purpose algorithm for approximately solving
+% problems of the the form
+%
+% $$\max_A \min_i F_i(A) \mbox{ s.t. }|A|\leq k$$
+%
+% for a collection of monotonic submodular utility functions F_i.
+%
+% *Example*: Here let's use the _SATURATE_ algorithm to minimize
+% worst-case variance in GP regression on Merced Lake.
+%
+% First pick 10 locations greedily using the greedy algorithm:
+k = 10; 
+%%
+% As objective function, we use variance reduction: 
+%
+% $$ F_{var}(A) = Var(V)-Var(V \mid A)$$
+%
+F_var = sfo_fn_varred(merced_data.sigma,V_sigma); 
+%%
+% _*Note*: Variance reduction is not always submodular, but under certain
+% conditions on the covariance matrix (see Das & Kempe, STOC '08)._ 
+%
+% We now use the greedy algorithm to minimize the _average_ variance:
+AG = sfo_greedy_lazy(F_var,V_sigma,k)
+%%
+% Now let's use the _SATURATE_ algorithm to minimize the _worst case_
+% variance.
+%
+AS = sfo_saturate(F_var,V_sigma,k,'minthresh')
+
+%%
+% Here's the locations selected by both algorithms:
+figure
+plot(merced_data.coords(:,1),merced_data.coords(:,2),'k.'); hold on
+plot(merced_data.coords(AG,1),merced_data.coords(AG,2),'bs','markerfacecolor','blue');
+xlabel('Horizontal location along transect'); ylabel('Vertical location (depth)'); title('Greedy locations (blue squares) and SATURATE locations (green diamonds)');
+plot(merced_data.coords(AS,1),merced_data.coords(AS,2),'gd','markerfacecolor','green');hold off
+
+%%
+% Here's the maximum remaining variance under both solutions:
+disp(sprintf('max remaining variance: Greedy = %f, SATURATE = %f',sfo_eval_maxvar(merced_data.sigma,AG),sfo_eval_maxvar(merced_data.sigma,AS)));
+
+%% The pSPIEL Algorithm for trading off accuracy and communication cost
+% pSPIEL is an algorithm for maximizing monotonic submodular functions
+% subject to complex cost functions.
+%
+% We will use the pSPIEL algorithm to trade off informativeness and
+% communication cost in GP regression on Merced Lake
+%
+% Let us set up a distance matrix D.
+% The cost of a link is 1 + the Euclidean distance between the connected
+% locations.
+% Hence the cost of a set A is the cost of connecting A using links
+% + the number of nodes in A
+%
+D = merced_data.dists + ones(length(V_sigma)); 
+%%
+% We attempt to find a tree which obtains 60 percent of the total variance
+% reduction:
+%
+Q = 0.6*F_var(V_sigma); 
+
+%%
+% We first run the greedy algorithm, ignoring cost
+%
+AG = sfo_cover(F_var,V_sigma,Q)
+
+%%
+% We now run pSPIEL for cost-benefit optimization:
+%
+AP = sfo_pspiel(F_var,V_sigma,Q,D)
+
+%%
+% Now we compute the utility obtained by both solutions
+%
+utility_greedy = F_var(AG)
+utility_pspiel = F_var(AP)
+%%
+% We also compute the cost of both solutions
+%
+[cost_greedy edges_greedy steiner_greedy] = sfo_pspiel_get_cost(AG,D);
+[cost_pspiel edges_pspiel steiner_pspiel]= sfo_pspiel_get_cost(AP,D);
+cost_greedy
+cost_pspiel
+%%
+% Now we plot the obtained trees
+%
+subplot(211);
+sfo_plot_subgraph(merced_data.coords,edges_greedy,steiner_greedy);
+title('Greedy-connect');
+subplot(212);
+sfo_plot_subgraph(merced_data.coords,edges_pspiel,steiner_pspiel);
+title('pSPIEL');
+
+%% The eSPASS algorithm for simultaneous placement and scheduling.
+% The eSPASS algorithm near-optimally solves the problem
+%
+% $$\max_{A_1,\dots,A_m} \min_i F(A_i) \mbox{ s.t. } |A_1\cup\dots\cup A_m|\leq k$$ 
+%
+% I.e., it finds m disjoint sets, with a total of k elements, that perform
+% equally well w.r.t. a monotonic submodular objective function F
+%
+% We pick k = 20 sensor locations to activate at m = 5 timeslices
+%
+% We first greedily optimize for the average case performance
+%
+F_var = sfo_fn_varred(merced_data.sigma,V_sigma); 
+Fs = {F_var,F_var,F_var,F_var,F_var};
+[A_sum,scores_sum] = sfo_greedy_welfare(Fs,V_sigma,20);
+%%
+% Now we use the eSPASS algorithm to optimize for balanced performance:
+%
+[A_min,scores_min] = sfo_balance(F_var,V_sigma,5,20);
+%%
+% Let's compare the avg. case scores: Both algorithms perform similar
+%
+disp(sprintf('Mean scores: Greedy = %f, eSPASS = %f',mean(scores_sum),mean(scores_min)));
+%%
+% Now we compare the min. score: eSPASS performs much better
+%
+disp(sprintf('Min scores: Greedy = %f, eSPASS = %f',min(scores_sum),min(scores_min)));
+
+%% PART 3) MISCELLANEOUS OTHER FUNCTIONS
+% The toolbox also provides some other functions that are useful when
+% working with submodular functions.
+
+%% The Lovasz extension
+% Every submodular function F induces a convex function, the _Lovasz
+% extension_, which generalizes F to the unit cube (and the positive
+% orthant).
+%
+% We will explore the Lovasz extension on the 2 element example function
+% from the tutorial slides at <http://www.submodularity.org>:
+%
+% $$F{\emptyset} = 0;\; F(\{a\}) = -1;\; F(\{b\}) = 2;\; F(\{a,b\}) = 0$$
+%
+F_ex = sfo_fn_example;
+V_ex = 1:2;
+%%
+% We can now define the Lovasz extension: 
+g = @(w) sfo_lovaszext(F_ex,V_ex,w);
+%%
+% Now we want to compate F_ex({b}) which should equal g([0,1]).
+% Let's first compute the characteristic vector for set A={b}:
+A = [2];
+w = sfo_charvector(V_ex,A)
+% Now we comparing the function F_ex(A) with Lovasz extension g(w):
+disp(sprintf('A = {b};   F(A) = %f;   g(wA) = %f',F_ex(A),g(w)));
+%%
+% Now we plot the Lovasz extension:
+[X,Y] = meshgrid(0:.05:1,0:.05:1);
+Z = zeros(size(X));
+for i = 1:size(X,1)
+    for j = 1:size(X,2)
+       Z(i,j) = g([X(i,j),Y(i,j)]);
+    end
+end
+figure
+surf(X,Y,Z)
+xlabel('w_{a}'); ylabel('w_{b}'); zlabel('g(w)')
+title('Lovasz extension for example from tutorial: F(\{\})=0,F(\{a\})=-1,F(\{b\})=2,F(\{a,b\})=0 ');
+
+
+%% Bounds on optimal solution for minimization
+% We can also get bounds on the optimal solution for minimization.
+% Let's suppose we guessed solution A={a}:
+A = [1];
+%%
+% Let's compute the bound:
+bound = sfo_minbound(F_ex,V_ex,A);
+disp(sprintf('bound = %f <= min F(A) <= F(B) = %f; ==> A is optimal!',bound,F_ex(A)));
+
+%% The polyhedron greedy algorithm 
+% Here's an example of the polyhedron greedy algorithm that solves the LP
+%
+% $$\max_x w^T x\mbox{ s.t. } x\in P_F$$
+%
+% Let's start with set A = {a}:
+A = [1];
+%%
+% Get the characteristic vector:
+w = sfo_charvector(V_ex,A); 
+%%
+% Run the polyhedron greedy algorithm:
+xw = sfo_polyhedrongreedy(F_ex,V_ex,w)
+%%
+% And now it should hold that 
+%
+% $$w^T x_w = F(A) = -1$$
+%
+w*xw'
+
+##### SOURCE END #####
+--></body></html>
