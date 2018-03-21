@@ -1,0 +1,31 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fswiss\fcharset0 ArialMT;}
+{\colortbl;\red255\green255\blue255;\red26\green26\blue26;\red255\green255\blue255;\red16\green60\blue192;
+\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c13333\c13333\c13333;\cssrgb\c100000\c100000\c100000;\cssrgb\c6667\c33333\c80000;
+\cssrgb\c0\c0\c0;}
+\margl1440\margr1440\vieww22580\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Shot-level C3D Feature Representation:\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+1. Segmentation - Code for temporal segmentation of videos (dividing videos into shots) - Ref: Video Co-Summarization, CVPR\'9215 - used a constraint such that length should be between [32,96] \
+2. C3D Feature Extraction - Use C3D-Caffe to extract fc6 features ({\field{\*\fldinst{HYPERLINK "https://github.com/facebook/C3D"}}{\fldrslt https://github.com/facebook/C3D}}) - extract one feature vector for 16 frames - no temporal overlap - use frames rather than direct videos\
+3. ConcateC3D - Code to concate the C3D features extracted using Caffe in step 2 - requires read_binary_blob function\
+4. ShotFeature - Code to generate shot level feature mapping from C3D features extracted in step 3 - also takes segmentation files as input \
+\
+\
+Half-Quadratic Optimization for Summarization:\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+Ref: 
+\f1 \cf2 \cb3 \expnd0\expndtw0\kerning0
+Efficient and Robust Feature Selection via Joint L21-Norms Minimization, NIPS\'9210 - {\field{\*\fldinst{HYPERLINK "http://www.escience.cn/system/file?fileId=67410"}}{\fldrslt \cf4 http://www.escience.cn/system/file?fileId=67410}}\cf4 \
+
+\fs25\fsmilli12800 \ul \
+
+\fs24 \cf5 \ulnone 1. main - main code for summarizing a target video X using auxiliary videos Y \'97 use cosine similarity (other two forms can also be used), optimization parameters can be set for the best performance\
+               Select representative shots from the output \'93replist\'94 as per user requirement \
+2. HQCvs - half-quadratic optimization code used to solve the objective function\
+3. Evaluation: Once the representative shots are computed from replist, we compare with ground truth summaries using the VSUMM evaluation package ({\field{\*\fldinst{HYPERLINK "https://sites.google.com/site/vsummsite/"}}{\fldrslt https://sites.google.com/site/vsummsite/}}) and compute the mean Average Precisions. VSUMM evaluation considers the similarity of two shots and decides if two shots are matching if the similarity is greater than a threshold (usually 0.5). One can also use the temporal overlap to compute the matching across different shots.\cb1 \
+}
